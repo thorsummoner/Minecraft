@@ -1,12 +1,20 @@
+"""
+    Simple Minecraft-inspired demo written in Python and Pyglet.
+"""
+#pylint: disable=line-too-long,invalid-name
+
+import sys
+
 import math
 import random
 import time
 
 import pyglet.gl
+import pyglet.window.key
+import pyglet.window.mouse
 from collections import deque
 from pyglet import image
 from pyglet.graphics import TextureGroup
-from pyglet.window import key, mouse
 
 TICKS_PER_SEC = 60
 
@@ -17,7 +25,8 @@ WALKING_SPEED = 5
 FLYING_SPEED = 15
 
 GRAVITY = 20.0
-MAX_JUMP_HEIGHT = 1.0 # About the height of a block.
+# About the height of a block.
+MAX_JUMP_HEIGHT = 1.0
 # To derive the formula for calculating jump speed, first solve
 #    v_t = v_0 + a * t
 # for the time at which you achieve maximum height, where a is the acceleration
@@ -30,17 +39,18 @@ TERMINAL_VELOCITY = 50
 
 PLAYER_HEIGHT = 2
 
+
 def cube_vertices(x, y, z, n):
     """ Return the vertices of the cube at position x, y, z with size 2*n.
 
     """
     return [
-        x-n,y+n,z-n, x-n,y+n,z+n, x+n,y+n,z+n, x+n,y+n,z-n,  # top
-        x-n,y-n,z-n, x+n,y-n,z-n, x+n,y-n,z+n, x-n,y-n,z+n,  # bottom
-        x-n,y-n,z-n, x-n,y-n,z+n, x-n,y+n,z+n, x-n,y+n,z-n,  # left
-        x+n,y-n,z+n, x+n,y-n,z-n, x+n,y+n,z-n, x+n,y+n,z+n,  # right
-        x-n,y-n,z+n, x+n,y-n,z+n, x+n,y+n,z+n, x-n,y+n,z+n,  # front
-        x+n,y-n,z-n, x-n,y-n,z-n, x-n,y+n,z-n, x+n,y+n,z-n,  # back
+        x-n, y+n, z-n, x-n, y+n, z+n, x+n, y+n, z+n, x+n, y+n, z-n,  # top
+        x-n, y-n, z-n, x+n, y-n, z-n, x+n, y-n, z+n, x-n, y-n, z+n,  # bottom
+        x-n, y-n, z-n, x-n, y-n, z+n, x-n, y+n, z+n, x-n, y+n, z-n,  # left
+        x+n, y-n, z+n, x+n, y-n, z-n, x+n, y+n, z-n, x+n, y+n, z+n,  # right
+        x-n, y-n, z+n, x+n, y-n, z+n, x+n, y+n, z+n, x-n, y+n, z+n,  # front
+        x+n, y-n, z-n, x-n, y-n, z-n, x-n, y+n, z-n, x+n, y+n, z-n,  # back
     ]
 
 
@@ -76,12 +86,12 @@ BRICK = tex_coords((2, 0), (2, 0), (2, 0))
 STONE = tex_coords((2, 1), (2, 1), (2, 1))
 
 FACES = [
-    ( 0, 1, 0),
-    ( 0,-1, 0),
+    (0, 1, 0),
+    (0, -1, 0),
     (-1, 0, 0),
-    ( 1, 0, 0),
-    ( 0, 0, 1),
-    ( 0, 0,-1),
+    (1, 0, 0),
+    (0, 0, 1),
+    (0, 0, -1),
 ]
 
 
@@ -121,6 +131,9 @@ def sectorize(position):
 
 
 class Model(object):
+    """
+        Model
+    """
 
     def __init__(self):
 
@@ -206,10 +219,10 @@ class Model(object):
         dx, dy, dz = vector
         previous = None
         for _ in xrange(max_distance * m):
-            key = normalize((x, y, z))
-            if key != previous and key in self.world:
-                return key, previous
-            previous = key
+            _key = normalize((x, y, z))
+            if _key != previous and _key in self.world:
+                return _key, previous
+            previous = _key
             x, y, z = x + dx / m, y + dy / m, z + dz / m
         return None, None
 
@@ -274,15 +287,15 @@ class Model(object):
         """
         x, y, z = position
         for dx, dy, dz in FACES:
-            key = (x + dx, y + dy, z + dz)
-            if key not in self.world:
+            _key = (x + dx, y + dy, z + dz)
+            if _key not in self.world:
                 continue
-            if self.exposed(key):
-                if key not in self.shown:
-                    self.show_block(key)
+            if self.exposed(_key):
+                if _key not in self.shown:
+                    self.show_block(_key)
             else:
-                if key in self.shown:
-                    self.hide_block(key)
+                if _key in self.shown:
+                    self.hide_block(_key)
 
     def show_block(self, position, immediate=True):
         """ Show the block at the given `position`. This method assumes the
@@ -320,9 +333,11 @@ class Model(object):
         texture_data = list(texture)
         # create vertex list
         # FIXME Maybe `add_indexed()` should be used instead
-        self._shown[position] = self.batch.add(24, pyglet.gl.GL_QUADS, self.group,
+        self._shown[position] = self.batch.add(
+            24, pyglet.gl.GL_QUADS, self.group,
             ('v3f/static', vertex_data),
-            ('t2f/static', texture_data))
+            ('t2f/static', texture_data)
+        )
 
     def hide_block(self, position, immediate=True):
         """ Hide the block at the given `position`. Hiding does not remove the
@@ -426,6 +441,9 @@ class Model(object):
 
 
 class Window(pyglet.window.Window):
+    """
+        Window
+    """
 
     def __init__(self, *args, **kwargs):
         super(Window, self).__init__(*args, **kwargs)
@@ -472,17 +490,25 @@ class Window(pyglet.window.Window):
         self.block = self.inventory[0]
 
         # Convenience list of num keys.
+        #pylint: disable=W0212
         self.num_keys = [
-            key._1, key._2, key._3, key._4, key._5,
-            key._6, key._7, key._8, key._9, key._0]
+            pyglet.window.key._1, pyglet.window.key._2,
+            pyglet.window.key._3, pyglet.window.key._4,
+            pyglet.window.key._5, pyglet.window.key._6,
+            pyglet.window.key._7, pyglet.window.key._8,
+            pyglet.window.key._9, pyglet.window.key._0
+        ]
+        #pylint: enable=W0212
 
         # Instance of the model that handles the world.
         self.model = Model()
 
         # The label that is displayed in the top left of the canvas.
-        self.label = pyglet.text.Label('', font_name='Arial', font_size=18,
+        self.label = pyglet.text.Label(
+            '', font_name='Arial', font_size=18,
             x=10, y=self.height - 10, anchor_x='left', anchor_y='top',
-            color=(0, 0, 0, 255))
+            color=(0, 0, 0, 255)
+        )
 
         # This call schedules the `update()` method to be called
         # TICKS_PER_SEC. This is the main game event loop.
@@ -586,7 +612,8 @@ class Window(pyglet.window.Window):
         """
         # walking
         speed = FLYING_SPEED if self.flying else WALKING_SPEED
-        d = dt * speed # distance covered this tick.
+        # distance covered this tick.
+        d = dt * speed
         dx, dy, dz = self.get_motion_vector()
         # New position in space, before accounting for gravity.
         dx, dy, dz = dx * d, dy * d, dz * d
@@ -669,8 +696,13 @@ class Window(pyglet.window.Window):
         if self.exclusive:
             vector = self.get_sight_vector()
             block, previous = self.model.hit_test(self.position, vector)
-            if (button == mouse.RIGHT) or \
-                    ((button == mouse.LEFT) and (modifiers & key.MOD_CTRL)):
+            if (
+                    (button == pyglet.window.mouse.RIGHT)
+                    or (
+                        (button == pyglet.window.mouse.LEFT)
+                        and (modifiers & pyglet.window.key.MOD_CTRL)
+                    )
+            ):
                 # ON OSX, control + left click = right click.
                 if previous:
                     self.model.add_block(previous, self.block)
@@ -712,20 +744,20 @@ class Window(pyglet.window.Window):
             Number representing any modifying keys that were pressed.
 
         """
-        if symbol == key.W:
+        if symbol == pyglet.window.key.W:
             self.strafe[0] -= 1
-        elif symbol == key.S:
+        elif symbol == pyglet.window.key.S:
             self.strafe[0] += 1
-        elif symbol == key.A:
+        elif symbol == pyglet.window.key.A:
             self.strafe[1] -= 1
-        elif symbol == key.D:
+        elif symbol == pyglet.window.key.D:
             self.strafe[1] += 1
-        elif symbol == key.SPACE:
+        elif symbol == pyglet.window.key.SPACE:
             if self.dy == 0:
                 self.dy = JUMP_SPEED
-        elif symbol == key.ESCAPE:
+        elif symbol == pyglet.window.key.ESCAPE:
             self.set_exclusive_mouse(False)
-        elif symbol == key.TAB:
+        elif symbol == pyglet.window.key.TAB:
             self.flying = not self.flying
         elif symbol in self.num_keys:
             index = (symbol - self.num_keys[0]) % len(self.inventory)
@@ -743,13 +775,13 @@ class Window(pyglet.window.Window):
             Number representing any modifying keys that were pressed.
 
         """
-        if symbol == key.W:
+        if symbol == pyglet.window.key.W:
             self.strafe[0] += 1
-        elif symbol == key.S:
+        elif symbol == pyglet.window.key.S:
             self.strafe[0] -= 1
-        elif symbol == key.A:
+        elif symbol == pyglet.window.key.A:
             self.strafe[1] += 1
-        elif symbol == key.D:
+        elif symbol == pyglet.window.key.D:
             self.strafe[1] -= 1
 
     def on_resize(self, width, height):
@@ -763,8 +795,8 @@ class Window(pyglet.window.Window):
             self.reticle.delete()
         x, y = self.width / 2, self.height / 2
         n = 10
-        self.reticle = pyglet.graphics.vertex_list(4,
-            ('v2i', (x - n, y, x + n, y, x, y - n, x, y + n))
+        self.reticle = pyglet.graphics.vertex_list(
+            4, ('v2i', (x - n, y, x + n, y, x, y - n, x, y + n))
         )
 
     def set_2d(self):
@@ -794,7 +826,10 @@ class Window(pyglet.window.Window):
         pyglet.gl.glLoadIdentity()
         x, y = self.rotation
         pyglet.gl.glRotatef(x, 0, 1, 0)
-        pyglet.gl.glRotatef(-y, math.cos(math.radians(x)), 0, math.sin(math.radians(x)))
+        pyglet.gl.glRotatef(
+            -y, math.cos(math.radians(x)),
+            0, math.sin(math.radians(x))
+        )
         x, y, z = self.position
         pyglet.gl.glTranslatef(-x, -y, -z)
 
@@ -822,9 +857,18 @@ class Window(pyglet.window.Window):
             x, y, z = block
             vertex_data = cube_vertices(x, y, z, 0.51)
             pyglet.gl.glColor3d(0, 0, 0)
-            pyglet.gl.glPolygonMode(pyglet.gl.GL_FRONT_AND_BACK, pyglet.gl.GL_LINE)
-            pyglet.graphics.draw(24, pyglet.gl.GL_QUADS, ('v3f/static', vertex_data))
-            pyglet.gl.glPolygonMode(pyglet.gl.GL_FRONT_AND_BACK, pyglet.gl.GL_FILL)
+            pyglet.gl.glPolygonMode(
+                pyglet.gl.GL_FRONT_AND_BACK,
+                pyglet.gl.GL_LINE
+            )
+            pyglet.graphics.draw(
+                24, pyglet.gl.GL_QUADS,
+                ('v3f/static', vertex_data)
+            )
+            pyglet.gl.glPolygonMode(
+                pyglet.gl.GL_FRONT_AND_BACK,
+                pyglet.gl.GL_FILL
+            )
 
     def draw_label(self):
         """ Draw the label in the top left of the screen.
@@ -833,7 +877,7 @@ class Window(pyglet.window.Window):
         x, y, z = self.position
         self.label.text = '%02d (%.2f, %.2f, %.2f) %d / %d' % (
             pyglet.clock.get_fps(), x, y, z,
-            len(self.model._shown), len(self.model.world))
+            len(self.model.shown), len(self.model.world))
         self.label.draw()
 
     def draw_reticle(self):
@@ -852,7 +896,10 @@ def setup_fog():
     # post-texturing color."
     pyglet.gl.glEnable(pyglet.gl.GL_FOG)
     # Set the fog color.
-    pyglet.gl.glFogfv(pyglet.gl.GL_FOG_COLOR, (pyglet.gl.GLfloat * 4)(0.5, 0.69, 1.0, 1))
+    pyglet.gl.glFogfv(
+        pyglet.gl.GL_FOG_COLOR,
+        (pyglet.gl.GLfloat * 4)(0.5, 0.69, 1.0, 1)
+    )
     # Say we have no preference between rendering speed and quality.
     pyglet.gl.glHint(pyglet.gl.GL_FOG_HINT, pyglet.gl.GL_DONT_CARE)
     # Specify the equation used to compute the blending factor.
@@ -877,18 +924,36 @@ def setup():
     # "is generally faster than GL_LINEAR, but it can produce textured images
     # with sharper edges because the transition between texture elements is not
     # as smooth."
-    pyglet.gl.glTexParameteri(pyglet.gl.GL_TEXTURE_2D, pyglet.gl.GL_TEXTURE_MIN_FILTER, pyglet.gl.GL_NEAREST)
-    pyglet.gl.glTexParameteri(pyglet.gl.GL_TEXTURE_2D, pyglet.gl.GL_TEXTURE_MAG_FILTER, pyglet.gl.GL_NEAREST)
+    pyglet.gl.glTexParameteri(
+        pyglet.gl.GL_TEXTURE_2D,
+        pyglet.gl.GL_TEXTURE_MIN_FILTER,
+        pyglet.gl.GL_NEAREST
+    )
+    pyglet.gl.glTexParameteri(
+        pyglet.gl.GL_TEXTURE_2D,
+        pyglet.gl.GL_TEXTURE_MAG_FILTER,
+        pyglet.gl.GL_NEAREST
+    )
     setup_fog()
 
 
 def main():
-    window = Window(width=800, height=600, caption='Pyglet', resizable=True)
-    # Hide the mouse cursor and prevent the mouse from leaving the window.
-    window.set_exclusive_mouse(True)
-    setup()
-    pyglet.app.run()
+    """ main
+    """
+    try:
+        window = Window(width=800, height=600, caption='Pyglet', resizable=True)
+        # Hide the mouse cursor and prevent the mouse from leaving the window.
+        window.set_exclusive_mouse(True)
+        setup()
+        pyglet.app.run()
+    except KeyboardInterrupt:
+        print 'User Exit'
+        pass
 
 
 if __name__ == '__main__':
-    main()
+    if '--profile' in sys.argv or '-p' in sys.argv:
+        import cProfile
+        cProfile.run('main()')
+    else:
+        main()
