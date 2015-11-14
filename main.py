@@ -10,8 +10,10 @@ import random
 import time
 
 import pyglet.gl
+#pylint: disable=no-name-in-module
 import pyglet.window.key
 import pyglet.window.mouse
+#pylint: enable=no-name-in-module
 from collections import deque
 from pyglet import image
 from pyglet.graphics import TextureGroup
@@ -514,6 +516,7 @@ class Window(pyglet.window.Window):
         # TICKS_PER_SEC. This is the main game event loop.
         pyglet.clock.schedule_interval(self.update, 1.0 / TICKS_PER_SEC)
 
+    #pylint: disable=signature-differs
     def set_exclusive_mouse(self, exclusive):
         """ If `exclusive` is True, the game will capture the mouse, if False
         the game will ignore the mouse.
@@ -521,6 +524,8 @@ class Window(pyglet.window.Window):
         """
         super(Window, self).set_exclusive_mouse(exclusive)
         self.exclusive = exclusive
+
+    #pylint: enable=signature-differs
 
     def get_sight_vector(self):
         """ Returns the current line of sight vector indicating the direction
@@ -676,6 +681,7 @@ class Window(pyglet.window.Window):
                     break
         return tuple(p)
 
+    #pylint: disable=arguments-differ
     def on_mouse_press(self, x, y, button, modifiers):
         """ Called when a mouse button is pressed. See pyglet docs for button
         amd modifier mappings.
@@ -788,6 +794,7 @@ class Window(pyglet.window.Window):
         """ Called when the window is resized to a new `width` and `height`.
 
         """
+        del width
         # label
         self.label.y = height - 10
         # reticle
@@ -798,6 +805,21 @@ class Window(pyglet.window.Window):
         self.reticle = pyglet.graphics.vertex_list(
             4, ('v2i', (x - n, y, x + n, y, x, y - n, x, y + n))
         )
+
+    def on_draw(self):
+        """ Called by pyglet to draw the canvas.
+
+        """
+        self.clear()
+        self.set_3d()
+        pyglet.gl.glColor3d(1, 1, 1)
+        self.model.batch.draw()
+        self.draw_focused_block()
+        self.set_2d()
+        self.draw_label()
+        self.draw_reticle()
+
+    #pylint: enable=arguments-differ
 
     def set_2d(self):
         """ Configure OpenGL to draw in 2d.
@@ -832,19 +854,6 @@ class Window(pyglet.window.Window):
         )
         x, y, z = self.position
         pyglet.gl.glTranslatef(-x, -y, -z)
-
-    def on_draw(self):
-        """ Called by pyglet to draw the canvas.
-
-        """
-        self.clear()
-        self.set_3d()
-        pyglet.gl.glColor3d(1, 1, 1)
-        self.model.batch.draw()
-        self.draw_focused_block()
-        self.set_2d()
-        self.draw_label()
-        self.draw_reticle()
 
     def draw_focused_block(self):
         """ Draw black edges around the block that is currently under the
@@ -948,7 +957,6 @@ def main():
         pyglet.app.run()
     except KeyboardInterrupt:
         print 'User Exit'
-        pass
 
 
 if __name__ == '__main__':
