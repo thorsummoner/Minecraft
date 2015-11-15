@@ -1,0 +1,14 @@
+#!/usr/bin/env python2
+
+import craft.pycraft
+import sys
+
+def main():
+    if '--profile' in sys.argv or '-p' in sys.argv:
+        import cProfile
+        cProfile.run('craft.pycraft.main()')
+    else:
+        craft.pycraft.main()
+
+if __name__ == '__main__':
+    main()
