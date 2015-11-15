@@ -6,6 +6,7 @@ import pyglet
 import craft
 import craft.window
 
+
 def main():
     """
         Main Entry Point

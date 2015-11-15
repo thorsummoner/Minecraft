@@ -2,9 +2,10 @@
     World Coordination
 """
 
-#pylint: disable=invalid-name
+# pylint: disable=invalid-name
 
 SECTOR_SIZE = 16
+
 
 def normalize(position):
     """ Accepts `position` of arbitrary precision and returns the block

@@ -9,7 +9,7 @@ import pyglet.window
 import craft.texture
 import craft.model
 
-#pylint: disable=invalid-name
+# pylint: disable=invalid-name
 
 WALKING_SPEED = 5
 FLYING_SPEED = 15
@@ -28,6 +28,7 @@ JUMP_SPEED = math.sqrt(2 * GRAVITY * MAX_JUMP_HEIGHT)
 TERMINAL_VELOCITY = 50
 
 PLAYER_HEIGHT = 2
+
 
 def setup_fog():
     """ Configure the OpenGL fog properties.
@@ -132,7 +133,7 @@ class Window(pyglet.window.Window):
         self.block = self.inventory[0]
 
         # Convenience list of num keys.
-        #pylint: disable=W0212
+        # pylint: disable=W0212
         self.num_keys = [
             pyglet.window.key._1, pyglet.window.key._2,
             pyglet.window.key._3, pyglet.window.key._4,
@@ -140,7 +141,7 @@ class Window(pyglet.window.Window):
             pyglet.window.key._7, pyglet.window.key._8,
             pyglet.window.key._9, pyglet.window.key._0
         ]
-        #pylint: enable=W0212
+        # pylint: enable=W0212
 
         # Instance of the model that handles the world.
         self.model = craft.model.Model()
@@ -156,7 +157,7 @@ class Window(pyglet.window.Window):
         # TICKS_PER_SEC. This is the main game event loop.
         pyglet.clock.schedule_interval(self.update, 1.0 / craft.TICKS_PER_SEC)
 
-    #pylint: disable=signature-differs
+    # pylint: disable=signature-differs
     def set_exclusive_mouse(self, exclusive):
         """ If `exclusive` is True, the game will capture the mouse, if False
         the game will ignore the mouse.
@@ -165,7 +166,7 @@ class Window(pyglet.window.Window):
         super(Window, self).set_exclusive_mouse(exclusive)
         self.exclusive = exclusive
 
-    #pylint: enable=signature-differs
+    # pylint: enable=signature-differs
 
     def get_sight_vector(self):
         """ Returns the current line of sight vector indicating the direction
@@ -321,7 +322,7 @@ class Window(pyglet.window.Window):
                     break
         return tuple(p)
 
-    #pylint: disable=arguments-differ
+    # pylint: disable=arguments-differ
     def on_mouse_press(self, x, y, button, modifiers):
         """ Called when a mouse button is pressed. See pyglet docs for button
         amd modifier mappings.
@@ -459,7 +460,7 @@ class Window(pyglet.window.Window):
         self.draw_label()
         self.draw_reticle()
 
-    #pylint: enable=arguments-differ
+    # pylint: enable=arguments-differ
 
     def set_2d(self):
         """ Configure OpenGL to draw in 2d.

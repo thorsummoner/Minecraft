@@ -6,7 +6,8 @@ import os.path
 
 TEXTURE_DIR = 'craft/texture'
 
-#pylint: disable=invalid-name
+
+# pylint: disable=invalid-name
 def coord(x, y, n=4):
     """ Return the bounding vertices of the texture square.
 
@@ -31,7 +32,7 @@ def coords(top, bottom, side):
     result.extend(side * 4)
     return result
 tex_coords = coords
-#pylint: enable=invalid-name
+# pylint: enable=invalid-name
 
 
 TEXTURE_PATH = os.path.join(TEXTURE_DIR, 'texture.png')

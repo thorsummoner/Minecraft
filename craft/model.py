@@ -13,9 +13,10 @@ import pyglet.gl
 import pyglet.graphics
 import pyglet.image
 
-#pylint: disable=invalid-name
+# pylint: disable=invalid-name
 
-#pylint: disable=line-too-long
+
+# pylint: disable=line-too-long
 def cube_vertices(x, y, z, n):
     """ Return the vertices of the cube at position x, y, z with size 2*n.
 
@@ -28,7 +29,7 @@ def cube_vertices(x, y, z, n):
         x-n, y-n, z+n, x+n, y-n, z+n, x+n, y+n, z+n, x-n, y+n, z+n,  # front
         x+n, y-n, z-n, x-n, y-n, z-n, x-n, y+n, z-n, x+n, y+n, z-n,  # back
     ]
-#pylint: enable=line-too-long
+# pylint: enable=line-too-long
 
 
 class Model(object):
@@ -345,4 +346,3 @@ class Model(object):
         """
         while self.queue:
             self._dequeue()
-
